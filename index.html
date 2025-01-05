@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Gift Generator</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #36393f;
+      color: #ffffff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button {
+      background-color: #7289da;
+      color: #ffffff;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      margin-bottom: 40px; /* Adjusted margin for better separation */
+      margin-top: 100px;
+    }
+
+    #codesTable {
+      width: 80%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      border-spacing: 0;
+      overflow: auto;
+    }
+
+    #codesTable th, #codesTable td {
+      padding: 10px;
+      border: 1px solid #7289da;
+    }
+
+    #codesTable th {
+      background-color: #7289da;
+      color: #ffffff;
+    }
+
+    #codesContainer {
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      #codesTable {
+        width: 100%;
+      }
+    }
+
+    a {
+      color: #7289da;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    function generateGiftCodes() {
+      const baseCode = "https://discord.gift/";
+      const numberOfCodes = 1000;
+      const codesTable = document.getElementById("codesTable");
+
+      // Clear existing rows
+      while (codesTable.rows.length > 1) {
+        codesTable.deleteRow(1);
+      }
+
+      for (let i = 1; i <= numberOfCodes; i++) {
+        const randomCode = Math.random().toString(36).substring(2, 12);
+        const giftCode = baseCode + randomCode;
+
+        // Create a new row
+        const row = codesTable.insertRow();
+        row.insertCell(0).textContent = i;
+        row.insertCell(1).innerHTML = `<a href="${giftCode}" target="_blank">${giftCode}</a>`;
+        row.insertCell(2).textContent = "Not Sure";
+      }
+    }
+
+    // Uncomment the line below to generate codes on page load
+    // generateGiftCodes();
+  </script>
+  <button onclick="generateGiftCodes()">Generate Gift Codes</button>
+  <table id="codesTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Link</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</body>
+</html>
