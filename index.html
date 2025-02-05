@@ -4,107 +4,318 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Discord Gift Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;700&family=Geist+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet" />
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'geist': ['Geist Sans', 'sans-serif'],
+            'geist-mono': ['Geist Mono', 'monospace'],
+          },
+          colors: {
+            'vercel': {
+              50: '#f7f7f7',
+              100: '#e6e6e6',
+              200: '#cccccc',
+              300: '#b3b3b3',
+              400: '#999999',
+              500: '#808080',
+              600: '#666666',
+              700: '#4d4d4d',
+              800: '#333333',
+              900: '#1a1a1a',
+            },
+          },
+        },
+      },
+    }
+  </script>
+
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #36393f;
-      color: #ffffff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    pre::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
     }
 
-    button {
-      background-color: #7289da;
-      color: #ffffff;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      margin-bottom: 40px; /* Adjusted margin for better separation */
-      margin-top: 100px;
+    pre::-webkit-scrollbar-track {
+      background: #1a1a1a;
     }
 
-    #codesTable {
-      width: 80%;
-      margin-top: 20px;
-      border-collapse: collapse;
-      border-spacing: 0;
-      overflow: auto;
+    pre::-webkit-scrollbar-thumb {
+      background-color: #333;
+      border-radius: 6px;
+      border: 3px solid #1a1a1a;
     }
 
-    #codesTable th, #codesTable td {
-      padding: 10px;
-      border: 1px solid #7289da;
+    .toast {
+      animation: slideIn 0.3s ease-out;
     }
 
-    #codesTable th {
-      background-color: #7289da;
-      color: #ffffff;
-    }
-
-    #codesContainer {
-      word-wrap: break-word;
-      white-space: pre-wrap;
-      font-size: 18px;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 600px) {
-      #codesTable {
-        width: 100%;
+    @keyframes slideIn {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
       }
     }
 
-    a {
-      color: #7289da;
-      text-decoration: underline;
-      cursor: pointer;
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
     }
   </style>
 </head>
-<body>
+<body class="bg-black text-white font-geist min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <header class="mb-12">
+      <h1 class="text-4xl font-bold tracking-tight mb-4">Discord Gift Generator</h1>
+      <p class="text-vercel-400 text-lg">Generate and manage Discord gift codes with ease.</p>
+    </header>
+
+    <!-- Main Content -->
+    <main class="space-y-8">
+      <!-- Configuration -->
+      <div class="bg-vercel-900 rounded-xl p-6 border border-vercel-700">
+        <h2 class="text-xl font-semibold mb-6">Configuration</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Amount -->
+          <div class="space-y-2">
+            <label for="amount" class="block text-sm font-medium text-vercel-400">
+              Amount of Codes
+              <span class="text-xs text-vercel-500">(Max 750)</span>
+            </label>
+            <div class="relative">
+              <input 
+                type="number" 
+                id="amount" 
+                value="100"
+                min="1"
+                max="750"
+                class="block w-full bg-black border border-vercel-700 rounded-lg px-4 py-2.5 text-white font-geist-mono focus:outline-none focus:ring-2 focus:ring-white/20"
+                onchange="validateAmount(this)"
+              >
+            </div>
+          </div>
+
+          <!-- Format -->
+          <div class="space-y-2">
+            <label for="format" class="block text-sm font-medium text-vercel-400">Output Format</label>
+            <select 
+              id="format" 
+              class="block w-full bg-black border border-vercel-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-white/20"
+            >
+              <option value="json">JSON</option>
+              <option value="text">Plain Text</option>
+              <option value="csv">CSV</option>
+            </select>
+          </div>
+
+          <!-- Code Length -->
+          <div class="space-y-2">
+            <label for="codeLength" class="block text-sm font-medium text-vercel-400">
+              Code Length
+              <span class="text-xs text-vercel-500">(8-14)</span>
+            </label>
+            <input 
+              type="number" 
+              id="codeLength" 
+              value="10"
+              min="8"
+              max="14"
+              class="block w-full bg-black border border-vercel-700 rounded-lg px-4 py-2.5 text-white font-geist-mono focus:outline-none focus:ring-2 focus:ring-white/20"
+              onchange="validateCodeLength(this)"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button 
+          onclick="generateGiftCodes()"
+          class="inline-flex items-center justify-center px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200"
+        >
+          Generate Codes
+        </button>
+        <button 
+          onclick="downloadCodes()"
+          class="inline-flex items-center justify-center px-6 py-3 bg-vercel-900 text-white font-semibold rounded-lg border border-vercel-700 hover:bg-vercel-800 transition-colors duration-200"
+        >
+          Download
+        </button>
+      </div>
+
+      <!-- Output Display -->
+      <div class="relative rounded-xl overflow-hidden bg-vercel-900 border border-vercel-700">
+        <div class="absolute top-4 right-4 z-10">
+          <button 
+            onclick="copyOutput()"
+            class="px-4 py-2 bg-vercel-800 text-sm text-white/80 rounded-md hover:bg-vercel-700 transition-colors duration-200 font-geist-mono"
+          >
+            Copy
+          </button>
+        </div>
+        <pre class="max-h-[600px] overflow-auto p-6 text-sm"><code class="language-json font-geist-mono" id="outputCode"></code></pre>
+      </div>
+    </main>
+
+    <!-- Stats -->
+    <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-vercel-900 rounded-lg p-6 border border-vercel-700">
+        <p class="text-vercel-400 text-sm font-medium">Total Codes</p>
+        <p class="mt-2 text-3xl font-semibold" id="statsAmount">-</p>
+      </div>
+      <div class="bg-vercel-900 rounded-lg p-6 border border-vercel-700">
+        <p class="text-vercel-400 text-sm font-medium">Code Length</p>
+        <p class="mt-2 text-3xl font-semibold" id="statsLength">-</p>
+      </div>
+      <div class="bg-vercel-900 rounded-lg p-6 border border-vercel-700">
+        <p class="text-vercel-400 text-sm font-medium">Format</p>
+        <p class="mt-2 text-3xl font-semibold" id="statsFormat">-</p>
+      </div>
+      <div class="bg-vercel-900 rounded-lg p-6 border border-vercel-700">
+        <p class="text-vercel-400 text-sm font-medium">Status</p>
+        <p class="mt-2 text-3xl font-semibold" id="statsStatus">Ready</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-4 right-4 hidden">
+    <div class="bg-white text-black px-6 py-3 rounded-lg shadow-lg font-medium">
+      <span id="toastMessage"></span>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+
   <script>
-    function generateGiftCodes() {
-      const baseCode = "https://discord.gift/";
-      const numberOfCodes = 1000;
-      const codesTable = document.getElementById("codesTable");
-
-      // Clear existing rows
-      while (codesTable.rows.length > 1) {
-        codesTable.deleteRow(1);
-      }
-
-      for (let i = 1; i <= numberOfCodes; i++) {
-        const randomCode = Math.random().toString(36).substring(2, 12);
-        const giftCode = baseCode + randomCode;
-
-        // Create a new row
-        const row = codesTable.insertRow();
-        row.insertCell(0).textContent = i;
-        row.insertCell(1).innerHTML = `<a href="${giftCode}" target="_blank">${giftCode}</a>`;
-        row.insertCell(2).textContent = "Not Sure";
-      }
+    function validateAmount(input) {
+      input.value = Math.min(Math.max(input.value, 1), 750);
     }
 
-    // Uncomment the line below to generate codes on page load
-    // generateGiftCodes();
+    function validateCodeLength(input) {
+      input.value = Math.min(Math.max(input.value, 8), 14);
+    }
+
+    function updateStats(amount, length, format) {
+      document.getElementById('statsAmount').textContent = amount;
+      document.getElementById('statsLength').textContent = length;
+      document.getElementById('statsFormat').textContent = format.toUpperCase();
+    }
+
+    function generateGiftCodes() {
+      const amount = parseInt(document.getElementById('amount').value);
+      const format = document.getElementById('format').value;
+      const codeLength = parseInt(document.getElementById('codeLength').value);
+      const baseCode = "https://discord.gift/";
+      const codes = [];
+
+      document.getElementById('statsStatus').textContent = 'Generating...';
+
+      for (let i = 1; i <= amount; i++) {
+        const randomCode = Math.random().toString(36).substring(2, 2 + codeLength);
+        const giftCode = baseCode + randomCode;
+        
+        codes.push({
+          id: i,
+          url: giftCode,
+          code: randomCode,
+          status: "idk"
+        });
+      }
+
+      let output = '';
+      switch(format) {
+        case 'json':
+          output = JSON.stringify({ gift_codes: codes }, null, 2);
+          break;
+        case 'text':
+          output = codes.map(code => code.url).join('\n');
+          break;
+        case 'csv':
+          output = 'ID,Code,URL,Status\n' + 
+                  codes.map(code => `${code.id},${code.code},${code.url},${code.status}`).join('\n');
+          break;
+      }
+
+      document.getElementById('outputCode').textContent = output;
+      document.getElementById('outputCode').className = `language-${format}`;
+      Prism.highlightElement(document.getElementById('outputCode'));
+      
+      updateStats(amount, codeLength, format);
+      document.getElementById('statsStatus').textContent = 'Complete';
+      showToast(`Generated ${amount} gift codes`);
+    }
+
+    function copyOutput() {
+      const content = document.getElementById('outputCode').textContent;
+      navigator.clipboard.writeText(content).then(() => {
+        showToast('Copied to clipboard');
+      }).catch(err => {
+        showToast('Failed to copy');
+      });
+    }
+
+    function downloadCodes() {
+      const content = document.getElementById('outputCode').textContent;
+      if (!content) {
+        showToast('Generate codes first');
+        return;
+      }
+
+      const format = document.getElementById('format').value;
+      const extensions = {
+        json: 'json',
+        text: 'txt',
+        csv: 'csv'
+      };
+
+      const blob = new Blob([content], { 
+        type: format === 'json' ? 'application/json' : 'text/plain' 
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `discord-gift-codes.${extensions[format]}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Downloaded file');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      toastMessage.textContent = message;
+      toast.classList.remove('hidden');
+      
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Initialize stats
+    updateStats(
+      document.getElementById('amount').value,
+      document.getElementById('codeLength').value,
+      document.getElementById('format').value
+    );
   </script>
-  <button onclick="generateGiftCodes()">Generate Gift Codes</button>
-  <table id="codesTable">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Link</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 </body>
 </html>
